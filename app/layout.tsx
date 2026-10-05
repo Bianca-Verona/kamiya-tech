@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import PWARegister from "./components/pwa-register";
+import InstallGuide from "./components/install-guide";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -44,7 +45,6 @@ export const metadata: Metadata = {
       {
         url: "/icons/apple-touch-icon.png",
         sizes: "180x180",
-        type: "image/png",
       },
     ],
   },
@@ -80,7 +80,9 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         {children}
+
         <PWARegister />
+        <InstallGuide />
       </body>
     </html>
   );
