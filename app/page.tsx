@@ -75,6 +75,44 @@ const expenseCategoryIcons: Record<string, string> = {
   OUTROS: "📋",
 };
 
+const mobileMenuItems = [
+  {
+    href: "/",
+    label: "Dashboard",
+    icon: "▦",
+  },
+  {
+    href: "/clientes",
+    label: "Clientes",
+    icon: "♙",
+  },
+  {
+    href: "/veiculos",
+    label: "Veículos",
+    icon: "🚗",
+  },
+  {
+    href: "/servicos",
+    label: "Serviços",
+    icon: "🔧",
+  },
+  {
+    href: "/garantias",
+    label: "Garantias",
+    icon: "🛡️",
+  },
+  {
+    href: "/despesas",
+    label: "Despesas",
+    icon: "💸",
+  },
+  {
+    href: "/relatorios",
+    label: "Relatórios",
+    icon: "📊",
+  },
+];
+
 function formatMoney(value: number) {
   return new Intl.NumberFormat("pt-BR", {
     style: "currency",
@@ -119,9 +157,7 @@ function getStartAndEndDate(period: Period) {
     const differenceToMonday =
       dayOfWeek === 0 ? 6 : dayOfWeek - 1;
 
-    start.setDate(
-      start.getDate() - differenceToMonday
-    );
+    start.setDate(start.getDate() - differenceToMonday);
 
     return {
       start: getLocalDateString(start),
@@ -152,12 +188,8 @@ function getStartAndEndDate(period: Period) {
     );
 
     return {
-      start: getLocalDateString(
-        previousMonthStart
-      ),
-      end: getLocalDateString(
-        previousMonthEnd
-      ),
+      start: getLocalDateString(previousMonthStart),
+      end: getLocalDateString(previousMonthEnd),
     };
   }
 
@@ -190,9 +222,7 @@ function getDaysRemaining(date: string) {
 
   today.setHours(0, 0, 0, 0);
 
-  const expiration = new Date(
-    `${date}T00:00:00`
-  );
+  const expiration = new Date(`${date}T00:00:00`);
 
   expiration.setHours(0, 0, 0, 0);
 
@@ -205,18 +235,12 @@ function getDaysRemaining(date: string) {
 export default function DashboardPage() {
   const supabase = createClient();
 
-  const [services, setServices] = useState<
-    ServiceOrder[]
-  >([]);
-
-  const [expenses, setExpenses] = useState<
-    Expense[]
-  >([]);
-
+  const [services, setServices] = useState<ServiceOrder[]>([]);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
+  const [period, setPeriod] = useState<Period>("MES");
 
-  const [period, setPeriod] =
-    useState<Period>("MES");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   async function loadDashboard() {
     setLoading(true);
@@ -292,9 +316,15 @@ export default function DashboardPage() {
     loadDashboard();
   }, []);
 
-  /* =================================
-     PERÍODO SELECIONADO
-  ================================= */
+  useEffect(() => {
+    document.body.style.overflow = mobileMenuOpen
+      ? "hidden"
+      : "";
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileMenuOpen]);
 
   const selectedPeriod = useMemo(() => {
     return getStartAndEndDate(period);
@@ -335,10 +365,6 @@ export default function DashboardPage() {
       );
     });
   }, [expenses, selectedPeriod]);
-
-  /* =================================
-     FINANCEIRO
-  ================================= */
 
   const totalRevenue = useMemo(() => {
     return periodServices.reduce(
@@ -384,10 +410,6 @@ export default function DashboardPage() {
   const finalResult =
     totalServiceProfit - totalExpenses;
 
-  /* =================================
-     GARANTIAS
-  ================================= */
-
   const activeWarranties = useMemo(() => {
     return services.filter(
       (service) =>
@@ -407,10 +429,6 @@ export default function DashboardPage() {
     });
   }, [services]);
 
-  /* =================================
-     RECENTES DO PERÍODO
-  ================================= */
-
   const recentServices = useMemo(() => {
     return periodServices.slice(0, 5);
   }, [periodServices]);
@@ -421,19 +439,16 @@ export default function DashboardPage() {
 
   return (
     <main className="min-h-screen bg-[#0a0a0a] text-white">
-
       <div className="flex min-h-screen">
 
         {/* =================================
-            SIDEBAR
+            SIDEBAR DESKTOP
         ================================= */}
 
         <aside className="hidden w-64 shrink-0 border-r border-white/10 bg-[#0d0d0d] lg:block">
-
           <div className="flex h-full flex-col">
 
             <div className="border-b border-white/10 px-6 py-6">
-
               <div className="flex items-center gap-3">
 
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-lg font-black text-black">
@@ -441,7 +456,6 @@ export default function DashboardPage() {
                 </div>
 
                 <div>
-
                   <p className="font-semibold tracking-wide">
                     KAMIYA TECH
                   </p>
@@ -449,11 +463,9 @@ export default function DashboardPage() {
                   <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-600">
                     Gestão automotiva
                   </p>
-
                 </div>
 
               </div>
-
             </div>
 
             <nav className="flex-1 px-3 py-5">
@@ -512,14 +524,19 @@ export default function DashboardPage() {
                   Despesas
                 </a>
 
-              </div>
+                <a
+                  href="/relatorios"
+                  className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm text-zinc-500 transition hover:bg-white/[0.04] hover:text-white"
+                >
+                  <span>📊</span>
+                  Relatórios
+                </a>
 
+              </div>
             </nav>
 
             <div className="border-t border-white/10 p-4">
-
               <div className="rounded-xl border border-white/5 bg-black/30 p-3">
-
                 <p className="text-xs font-medium text-zinc-300">
                   Kamiya Tech
                 </p>
@@ -527,13 +544,10 @@ export default function DashboardPage() {
                 <p className="mt-1 text-[10px] text-zinc-600">
                   Sistema de gestão
                 </p>
-
               </div>
-
             </div>
 
           </div>
-
         </aside>
 
         {/* =================================
@@ -542,32 +556,49 @@ export default function DashboardPage() {
 
         <div className="flex-1">
 
-          <header className="border-b border-white/10 bg-[#0a0a0a] px-6 py-5 lg:px-10">
+          <header className="border-b border-white/10 bg-[#0a0a0a] px-4 py-4 sm:px-6 sm:py-5 lg:px-10">
 
-            <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
+            <div className="mx-auto flex max-w-7xl items-center justify-between gap-3">
 
-              <div>
+              {/* ESQUERDA DO HEADER */}
 
-                <p className="text-xs uppercase tracking-[0.2em] text-zinc-600">
-                  Visão geral
-                </p>
+              <div className="flex min-w-0 items-center gap-3">
 
-                <h1 className="mt-1 text-2xl font-semibold">
-                  Dashboard
-                </h1>
+                {/* BOTÃO MOBILE */}
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setMobileMenuOpen(true)
+                  }
+                  aria-label="Abrir menu"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-[#111111] text-xl text-white transition hover:bg-white/10 lg:hidden"
+                >
+                  ☰
+                </button>
+
+                <div className="min-w-0">
+
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-600 sm:text-xs">
+                    Visão geral
+                  </p>
+
+                  <h1 className="mt-1 text-xl font-semibold sm:text-2xl">
+                    Dashboard
+                  </h1>
+
+                </div>
 
               </div>
 
               {/* FILTRO */}
 
-              <div className="flex items-center gap-3">
+              <div className="flex shrink-0 items-center gap-2 sm:gap-3">
 
                 <div className="hidden text-right sm:block">
-
                   <p className="text-[10px] uppercase tracking-wider text-zinc-600">
                     Período
                   </p>
-
                 </div>
 
                 <select
@@ -577,7 +608,7 @@ export default function DashboardPage() {
                       event.target.value as Period
                     )
                   }
-                  className="rounded-xl border border-white/10 bg-[#111111] px-4 py-3 text-sm text-white outline-none transition focus:border-white/30"
+                  className="max-w-[130px] rounded-xl border border-white/10 bg-[#111111] px-3 py-3 text-xs text-white outline-none transition focus:border-white/30 sm:max-w-none sm:px-4 sm:text-sm"
                 >
                   <option value="HOJE">
                     Hoje
@@ -606,7 +637,6 @@ export default function DashboardPage() {
                   <option value="TODOS">
                     Todos
                   </option>
-
                 </select>
 
               </div>
@@ -619,14 +649,13 @@ export default function DashboardPage() {
               DASHBOARD
           ================================= */}
 
-          <main className="mx-auto max-w-7xl p-6 lg:p-10">
+          <main className="mx-auto max-w-7xl p-4 sm:p-6 lg:p-10">
 
             {/* AVISO DO PERÍODO */}
 
             <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
 
               <div>
-
                 <p className="text-sm font-medium text-zinc-300">
                   Visão financeira
                 </p>
@@ -634,7 +663,6 @@ export default function DashboardPage() {
                 <p className="text-xs text-zinc-600">
                   Os valores abaixo correspondem ao período selecionado.
                 </p>
-
               </div>
 
               <span className="text-xs text-zinc-600">
@@ -650,20 +678,16 @@ export default function DashboardPage() {
 
             </div>
 
-            {/* =================================
-                CARDS FINANCEIROS
-            ================================= */}
+            {/* CARDS FINANCEIROS */}
 
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
 
               {/* FATURAMENTO */}
 
               <div className="rounded-2xl border border-white/10 bg-[#0d0d0d] p-5">
-
                 <div className="flex items-start justify-between">
 
                   <div>
-
                     <p className="text-xs uppercase tracking-wider text-zinc-600">
                       Faturamento
                     </p>
@@ -675,7 +699,6 @@ export default function DashboardPage() {
                             totalRevenue
                           )}
                     </p>
-
                   </div>
 
                   <span className="text-xl">
@@ -687,17 +710,14 @@ export default function DashboardPage() {
                 <p className="mt-3 text-xs text-zinc-600">
                   Total recebido pelos serviços
                 </p>
-
               </div>
 
               {/* LUCRO */}
 
               <div className="rounded-2xl border border-white/10 bg-[#0d0d0d] p-5">
-
                 <div className="flex items-start justify-between">
 
                   <div>
-
                     <p className="text-xs uppercase tracking-wider text-zinc-600">
                       Lucro dos serviços
                     </p>
@@ -709,7 +729,6 @@ export default function DashboardPage() {
                             totalServiceProfit
                           )}
                     </p>
-
                   </div>
 
                   <span className="text-xl">
@@ -721,17 +740,14 @@ export default function DashboardPage() {
                 <p className="mt-3 text-xs text-zinc-600">
                   Após repasses e custos de mapa
                 </p>
-
               </div>
 
               {/* DESPESAS */}
 
               <div className="rounded-2xl border border-white/10 bg-[#0d0d0d] p-5">
-
                 <div className="flex items-start justify-between">
 
                   <div>
-
                     <p className="text-xs uppercase tracking-wider text-zinc-600">
                       Despesas
                     </p>
@@ -743,7 +759,6 @@ export default function DashboardPage() {
                             totalExpenses
                           )}
                     </p>
-
                   </div>
 
                   <span className="text-xl">
@@ -755,17 +770,14 @@ export default function DashboardPage() {
                 <p className="mt-3 text-xs text-zinc-600">
                   Gastos da operação
                 </p>
-
               </div>
 
               {/* RESULTADO */}
 
               <div className="rounded-2xl border border-white/10 bg-[#0d0d0d] p-5">
-
                 <div className="flex items-start justify-between">
 
                   <div>
-
                     <p className="text-xs uppercase tracking-wider text-zinc-600">
                       Resultado final
                     </p>
@@ -783,7 +795,6 @@ export default function DashboardPage() {
                             finalResult
                           )}
                     </p>
-
                   </div>
 
                   <span className="text-xl">
@@ -795,23 +806,20 @@ export default function DashboardPage() {
                 <p className="mt-3 text-xs text-zinc-600">
                   Lucro dos serviços - despesas
                 </p>
-
               </div>
 
             </div>
 
-            {/* =================================
-                RESUMO OPERACIONAL
-            ================================= */}
+            {/* RESUMO OPERACIONAL */}
 
             <div className="mt-6 grid gap-4 sm:grid-cols-3">
 
-              <div className="rounded-2xl border border-white/10 bg-[#0d0d0d] p-5">
+              {/* SERVIÇOS */}
 
+              <div className="rounded-2xl border border-white/10 bg-[#0d0d0d] p-5">
                 <div className="flex items-center justify-between">
 
                   <div>
-
                     <p className="text-xs uppercase tracking-wider text-zinc-600">
                       Serviços
                     </p>
@@ -821,7 +829,6 @@ export default function DashboardPage() {
                         ? "..."
                         : periodServices.length}
                     </p>
-
                   </div>
 
                   <span className="text-xl">
@@ -833,15 +840,14 @@ export default function DashboardPage() {
                 <p className="mt-2 text-xs text-zinc-600">
                   No período selecionado
                 </p>
-
               </div>
 
-              <div className="rounded-2xl border border-white/10 bg-[#0d0d0d] p-5">
+              {/* GARANTIAS */}
 
+              <div className="rounded-2xl border border-white/10 bg-[#0d0d0d] p-5">
                 <div className="flex items-center justify-between">
 
                   <div>
-
                     <p className="text-xs uppercase tracking-wider text-zinc-600">
                       Garantias ativas
                     </p>
@@ -851,7 +857,6 @@ export default function DashboardPage() {
                         ? "..."
                         : activeWarranties.length}
                     </p>
-
                   </div>
 
                   <span className="text-xl">
@@ -863,15 +868,14 @@ export default function DashboardPage() {
                 <p className="mt-2 text-xs text-zinc-600">
                   Situação atual
                 </p>
-
               </div>
 
-              <div className="rounded-2xl border border-white/10 bg-[#0d0d0d] p-5">
+              {/* MARKETING */}
 
+              <div className="rounded-2xl border border-white/10 bg-[#0d0d0d] p-5">
                 <div className="flex items-center justify-between">
 
                   <div>
-
                     <p className="text-xs uppercase tracking-wider text-zinc-600">
                       Marketing
                     </p>
@@ -883,7 +887,6 @@ export default function DashboardPage() {
                             totalMarketing
                           )}
                     </p>
-
                   </div>
 
                   <span className="text-xl">
@@ -895,14 +898,11 @@ export default function DashboardPage() {
                 <p className="mt-2 text-xs text-zinc-600">
                   Investido no período
                 </p>
-
               </div>
 
             </div>
 
-            {/* =================================
-                SERVIÇOS + GARANTIAS
-            ================================= */}
+            {/* SERVIÇOS + GARANTIAS */}
 
             <div className="mt-6 grid gap-6 xl:grid-cols-[1.5fr_1fr]">
 
@@ -913,7 +913,6 @@ export default function DashboardPage() {
                 <div className="flex items-center justify-between border-b border-white/10 px-6 py-5">
 
                   <div>
-
                     <h2 className="font-semibold">
                       Serviços recentes
                     </h2>
@@ -921,7 +920,6 @@ export default function DashboardPage() {
                     <p className="mt-1 text-xs text-zinc-600">
                       Serviços do período
                     </p>
-
                   </div>
 
                   <a
@@ -1054,7 +1052,6 @@ export default function DashboardPage() {
                 <div className="flex items-center justify-between border-b border-white/10 px-6 py-5">
 
                   <div>
-
                     <h2 className="font-semibold">
                       Garantias próximas
                     </h2>
@@ -1062,7 +1059,6 @@ export default function DashboardPage() {
                     <p className="mt-1 text-xs text-zinc-600">
                       Vencendo nos próximos 15 dias
                     </p>
-
                   </div>
 
                   <a
@@ -1173,16 +1169,13 @@ export default function DashboardPage() {
 
             </div>
 
-            {/* =================================
-                DESPESAS
-            ================================= */}
+            {/* DESPESAS */}
 
             <section className="mt-6 overflow-hidden rounded-2xl border border-white/10 bg-[#0d0d0d]">
 
               <div className="flex items-center justify-between border-b border-white/10 px-6 py-5">
 
                 <div>
-
                   <h2 className="font-semibold">
                     Despesas recentes
                   </h2>
@@ -1190,7 +1183,6 @@ export default function DashboardPage() {
                   <p className="mt-1 text-xs text-zinc-600">
                     Gastos do período
                   </p>
-
                 </div>
 
                 <a
@@ -1279,7 +1271,6 @@ export default function DashboardPage() {
                         </p>
 
                       </div>
-
                     )
                   )}
 
@@ -1291,8 +1282,120 @@ export default function DashboardPage() {
           </main>
 
         </div>
-
       </div>
+
+      {/* =================================
+          MENU MOBILE
+      ================================= */}
+
+      {mobileMenuOpen && (
+        <>
+          {/* FUNDO ESCURO */}
+
+          <button
+            type="button"
+            aria-label="Fechar menu"
+            onClick={() =>
+              setMobileMenuOpen(false)
+            }
+            className="fixed inset-0 z-[998] bg-black/70 backdrop-blur-sm lg:hidden"
+          />
+
+          {/* MENU LATERAL */}
+
+          <aside className="fixed left-0 top-0 z-[999] flex h-screen w-[280px] flex-col border-r border-white/10 bg-[#0d0d0d] shadow-2xl lg:hidden">
+
+            {/* CABEÇALHO */}
+
+            <div className="flex items-center justify-between border-b border-white/10 px-5 py-5">
+
+              <div className="flex items-center gap-3">
+
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-lg font-black text-black">
+                  K
+                </div>
+
+                <div>
+                  <p className="font-semibold tracking-wide">
+                    KAMIYA TECH
+                  </p>
+
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-600">
+                    Gestão automotiva
+                  </p>
+                </div>
+
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setMobileMenuOpen(false)
+                }
+                aria-label="Fechar menu"
+                className="flex h-9 w-9 items-center justify-center rounded-xl text-lg text-zinc-400 transition hover:bg-white/10 hover:text-white"
+              >
+                ✕
+              </button>
+
+            </div>
+
+            {/* NAVEGAÇÃO */}
+
+            <nav className="flex-1 overflow-y-auto px-3 py-5">
+
+              <p className="mb-3 px-3 text-[10px] uppercase tracking-[0.2em] text-zinc-700">
+                Menu
+              </p>
+
+              <div className="space-y-1">
+
+                {mobileMenuItems.map(
+                  (item) => (
+                    <a
+                      key={item.href}
+                      href={item.href}
+                      onClick={() =>
+                        setMobileMenuOpen(false)
+                      }
+                      className="flex items-center gap-3 rounded-xl px-3 py-3.5 text-sm text-zinc-400 transition hover:bg-white/[0.06] hover:text-white"
+                    >
+
+                      <span className="w-6 text-center text-base">
+                        {item.icon}
+                      </span>
+
+                      {item.label}
+
+                    </a>
+                  )
+                )}
+
+              </div>
+
+            </nav>
+
+            {/* RODAPÉ */}
+
+            <div className="border-t border-white/10 p-4">
+
+              <div className="rounded-xl border border-white/5 bg-black/30 p-3">
+
+                <p className="text-xs font-medium text-zinc-300">
+                  Kamiya Tech
+                </p>
+
+                <p className="mt-1 text-[10px] text-zinc-600">
+                  Sistema de gestão
+                </p>
+
+              </div>
+
+            </div>
+
+          </aside>
+        </>
+      )}
 
     </main>
   );
